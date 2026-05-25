@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Создать пост — ROZDUM{% endblock %}
+{% block content %}
+
+<section class="form-card card">
+    <div class="back-row">
+        <a class="back-btn" href="{{ url_for('forum') }}">← Назад</a>
+    </div>
+
+    <h1>Создать пост</h1>
+    <p class="muted">Напиши тему, добавь текст, категорию, теги и до 5 фото.</p>
+
+    <form method="POST" enctype="multipart/form-data">
+        <div class="field">
+            <label>Заголовок</label>
+            <input type="text" name="title" placeholder="О чём твой пост?" required>
+        </div>
+
+        <div class="field">
+            <label>Категория</label>
+            <select name="category_id" class="input-select" required>
+                {% for c in categories %}
+                    <option value="{{ c.id }}">{{ c.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Теги</label>
+            <input type="text" name="tags" placeholder="игры, новости, помощь">
+        </div>
+
+        <div class="field">
+            <label>Текст</label>
+            <textarea name="content" rows="10" placeholder="Напиши пост..." required></textarea>
+        </div>
+
+        <div class="field">
+            <label class="file-label">Выбери до 5 фото</label>
+            <input type="file" name="images" accept="image/*" multiple>
+        </div>
+
+        <div class="form-actions">
+            <a class="btn-ghost" href="{{ url_for('forum') }}">Назад</a>
+            <button class="btn-primary" type="submit">Опубликовать</button>
+        </div>
+    </form>
+</section>
+
+{% endblock %}

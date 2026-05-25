@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Чат с {{ other.nickname }} — ROZDUM{% endblock %}
+{% block content %}
+
+<script>
+    window.CHAT_THREAD_ID = {{ thread.id }};
+</script>
+
+<section class="chat-shell card">
+    <aside class="chat-sidebar">
+        <div class="back-row">
+            <a class="back-btn" href="{{ url_for('chats') }}">← Назад</a>
+        </div>
+
+        <div class="thread-item active">
+            <div class="avatar avatar-sm">
+                {% if other.avatar %}
+                    <img src="{{ url_for('static', filename='uploads/' ~ other.avatar) }}" alt="avatar">
+                {% else %}
+                    <span>{{ other.nickname[:1] | upper }}</span>
+                {% endif %}
+            </div>
+            <div class="thread-meta">
+                <strong>{{ other.nickname }}</strong>
+                <span>@{{ other.username }}</span>
+                {% if other.status %}
+                    <small>{{ other.status }}</small>
+                {% endif %}
+            </div>
+        </div>
+    </aside>
+
+    <section class="chat-window">
+        <div class="chat-header">
+            <div>
+                <h1>{{ other.nickname }}</h1>
+                <p class="muted">@{{ other.username }}</p>
+            </div>
+            <a class="btn-ghost" href="{{ url_for('profile', username=other.username) }}">Профиль</a>
+        </div>
+
+        <div class="messages-list">
+            {% if messages|length == 0 %}
+                <div class="empty-chat-list">Сообщений пока нет.</div>
+            {% endif %}
+
+            {% for msg in messages %}
+                <div class="message {% if msg.is_me %}me{% else %}them{% endif %}">
+                    <div class="message-bubble">{{ msg.content_html|safe }}</div>
+                    <div class="message-time">{{ msg.created_at.strftime('%H:%M') }}</div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <form class="chat-form" method="POST">
+            <textarea name="content" rows="2" placeholder="Написать сообщение..." required></textarea>
+            <button class="btn-primary" type="submit">Отправить</button>
+        </form>
+    </section>
+</section>
+
+{% endblock %}

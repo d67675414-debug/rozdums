@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Сохранённые — ROZDUM{% endblock %}
+{% block content %}
+
+<div class="back-row">
+    <a class="back-btn" href="{{ url_for('forum') }}">← Назад</a>
+</div>
+
+<section class="section-title">
+    <h1>Сохранённые посты</h1>
+</section>
+
+<section class="topics-grid">
+    {% if topics|length == 0 %}
+        <div class="empty-card card">
+            <h3>Пока ничего не сохранено</h3>
+        </div>
+    {% endif %}
+
+    {% for topic in topics %}
+        <article class="topic-card card">
+            <div class="topic-head">
+                <a class="avatar" href="{{ url_for('profile', username=topic.author.username) }}">
+                    {% if topic.author.avatar %}
+                        <img src="{{ url_for('static', filename='uploads/' ~ topic.author.avatar) }}" alt="avatar">
+                    {% else %}
+                        <span>{{ topic.author.nickname[:1] | upper }}</span>
+                    {% endif %}
+                </a>
+
+                <div class="topic-meta">
+                    <div class="topic-author">
+                        <a href="{{ url_for('profile', username=topic.author.username) }}">{{ topic.author.nickname }}</a>
+                    </div>
+                    <div class="topic-submeta">@{{ topic.author.username }}</div>
+                </div>
+            </div>
+
+            <h2 class="topic-title">
+                <a href="{{ url_for('topic_view', topic_id=topic.id) }}">{{ topic.title }}</a>
+            </h2>
+
+            <p class="topic-text">{{ topic.content_html|safe }}</p>
+
+            <div class="post-actions">
+                <a class="small-btn" href="{{ url_for('topic_view', topic_id=topic.id) }}">Открыть</a>
+                <form method="POST" action="{{ url_for('toggle_save_topic', topic_id=topic.id) }}">
+                    <button class="small-btn" type="submit">Убрать из сохранённых</button>
+                </form>
+            </div>
+        </article>
+    {% endfor %}
+</section>
+
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Админ-редактирование — ROZDUM{% endblock %}
+{% block content %}
+
+<div class="back-row">
+    <a class="back-btn" href="{{ url_for('profile', username=user.username) }}">← Назад</a>
+</div>
+
+<section class="form-card card">
+    <h1>Админ-редактирование профиля</h1>
+    <p class="muted">Только админ может менять статус, ник, роль и аватарку.</p>
+
+    <form method="POST" enctype="multipart/form-data">
+        <div class="field">
+            <label>Логин</label>
+            <input type="text" value="{{ user.username }}" disabled>
+        </div>
+
+        <div class="field">
+            <label>Ник</label>
+            <input type="text" name="nickname" value="{{ user.nickname }}" required>
+        </div>
+
+        <div class="field">
+            <label>Роль</label>
+            <select name="role" class="input-select">
+                <option value="user" {% if user.role == 'user' %}selected{% endif %}>user</option>
+                <option value="moderator" {% if user.role == 'moderator' %}selected{% endif %}>moderator</option>
+                <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>admin</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Статус под ником</label>
+            <input type="text" name="status" value="{{ user.status }}" placeholder="Например: Автор, VIP, Модератор">
+        </div>
+
+        <div class="field">
+            <label>Описание</label>
+            <textarea name="bio" rows="6">{{ user.bio }}</textarea>
+        </div>
+
+        <div class="field">
+            <label class="file-label">Новая аватарка</label>
+            <input type="file" name="avatar" accept="image/*">
+        </div>
+
+        <div class="form-actions">
+            <a class="btn-ghost" href="{{ url_for('profile', username=user.username) }}">Назад</a>
+            <button class="btn-primary" type="submit">Сохранить</button>
+        </div>
+    </form>
+</section>
+
+{% endblock %}

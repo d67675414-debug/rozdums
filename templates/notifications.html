@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Уведомления — ROZDUM{% endblock %}
+{% block content %}
+
+<div class="back-row">
+    <a class="back-btn" href="{{ url_for('forum') }}">← Назад</a>
+</div>
+
+<section class="section-title">
+    <h1>Уведомления</h1>
+</section>
+
+<section class="notifications-list">
+    {% if notifications|length == 0 %}
+        <div class="empty-card card">
+            <h3>Пока нет уведомлений</h3>
+        </div>
+    {% endif %}
+
+    {% for note in notifications %}
+        <a class="notification-item card {% if not note.is_read %}unread{% endif %}"
+           href="{{ url_for('open_notification', notification_id=note.id) }}">
+            <div class="notification-text">{{ note.text }}</div>
+            <div class="notification-time">{{ note.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+        </a>
+    {% endfor %}
+</section>
+
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Чаты — ROZDUM{% endblock %}
+{% block content %}
+
+<section class="chat-shell card">
+    <aside class="chat-sidebar">
+        <div class="chat-sidebar-top">
+            <h1>Чаты</h1>
+            <p class="muted">Пишите людям, как в Telegram.</p>
+        </div>
+
+        <form class="search-box chat-search" method="GET" action="{{ url_for('chats') }}">
+            <input type="text" name="q" value="{{ search }}" placeholder="Найти пользователя">
+            <button class="btn-primary" type="submit">Найти</button>
+        </form>
+
+        {% if users|length > 0 %}
+            <div class="chat-users-title">Пользователи</div>
+            <div class="chat-user-list">
+                {% for user in users %}
+                    <a class="thread-item" href="{{ url_for('chat_with_user', username=user.username) }}">
+                        <div class="avatar avatar-sm">
+                            {% if user.avatar %}
+                                <img src="{{ url_for('static', filename='uploads/' ~ user.avatar) }}" alt="avatar">
+                            {% else %}
+                                <span>{{ user.nickname[:1] | upper }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="thread-meta">
+                            <strong>{{ user.nickname }}</strong>
+                            <span>@{{ user.username }}</span>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="chat-users-title">Ваши диалоги</div>
+        <div class="thread-list">
+            {% if threads|length == 0 %}
+                <div class="empty-chat-list">
+                    Пока нет диалогов.
+                </div>
+            {% endif %}
+
+            {% for item in threads %}
+                <a class="thread-item" href="{{ url_for('chat_with_user', username=item.partner.username) }}">
+                    <div class="avatar avatar-sm">
+                        {% if item.partner.avatar %}
+                            <img src="{{ url_for('static', filename='uploads/' ~ item.partner.avatar) }}" alt="avatar">
+                        {% else %}
+                            <span>{{ item.partner.nickname[:1] | upper }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="thread-meta">
+                        <strong>{{ item.partner.nickname }}</strong>
+                        <span>@{{ item.partner.username }}</span>
+                        {% if item.last_message %}
+                            <small>{{ item.last_message.content[:42] }}</small>
+                        {% endif %}
+                    </div>
+
+                    {% if item.unread_count > 0 %}
+                        <span class="chat-badge">{{ item.unread_count }}</span>
+                    {% endif %}
+                </a>
+            {% endfor %}
+        </div>
+    </aside>
+
+    <section class="chat-empty">
+        <div class="chat-empty-card">
+            <h2>Выбери чат</h2>
+            <p>Открой диалог слева или найди пользователя в поиске.</p>
+        </div>
+    </section>
+</section>
+
+{% endblock %}

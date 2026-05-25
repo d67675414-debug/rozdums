@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Редактировать пост — ROZDUM{% endblock %}
+{% block content %}
+
+<section class="form-card card">
+    <div class="back-row">
+        <a class="back-btn" href="{{ url_for('topic_view', topic_id=topic.id) }}">← Назад</a>
+    </div>
+
+    <h1>Редактировать пост</h1>
+
+    {% if topic.images|length > 0 %}
+        <div class="image-grid edit-grid">
+            {% for img in topic.images %}
+                <img class="topic-image" src="{{ url_for('static', filename='uploads/' ~ img.filename) }}" alt="current image">
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data">
+        <div class="field">
+            <label>Заголовок</label>
+            <input type="text" name="title" value="{{ topic.title }}" required>
+        </div>
+
+        <div class="field">
+            <label>Категория</label>
+            <select name="category_id" class="input-select" required>
+                {% for c in categories %}
+                    <option value="{{ c.id }}" {% if c.id == topic.category_id %}selected{% endif %}>{{ c.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Теги</label>
+            <input type="text" name="tags" value="{{ topic.tags|map(attribute='name')|join(', ') }}" placeholder="игры, новости, помощь">
+        </div>
+
+        <div class="field">
+            <label>Текст</label>
+            <textarea name="content" rows="10" required>{{ topic.content }}</textarea>
+        </div>
+
+        <div class="field">
+            <label class="file-label">Добавь ещё фото (если меньше 5)</label>
+            <input type="file" name="images" accept="image/*" multiple>
+        </div>
+
+        <div class="form-actions">
+            <a class="btn-ghost" href="{{ url_for('topic_view', topic_id=topic.id) }}">Назад</a>
+            <button class="btn-primary" type="submit">Сохранить</button>
+        </div>
+    </form>
+</section>
+
+{% endblock %}

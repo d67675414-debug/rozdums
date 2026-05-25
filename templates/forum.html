@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block title %}Форум — ROZDUM{% endblock %}
+{% block content %}
+
+<section class="hero-strip card">
+    <div>
+        <h1>ROZDUM</h1>
+        <p>Ищи посты, ищи людей по <b>@username</b>, смотри реакции, чаты и уведомления.</p>
+    </div>
+    <a class="btn-primary" href="{{ url_for('create_topic') }}">+ Создать пост</a>
+</section>
+
+<section class="category-pills card">
+    <a class="category-pill {% if not category_id %}active{% endif %}" href="{{ url_for('forum', q=search) }}">Все</a>
+    {% for c in categories %}
+        <a class="category-pill {% if category_id == c.id %}active{% endif %}" href="{{ url_for('forum', q=search, category_id=c.id) }}">#{{ c.name }}</a>
+    {% endfor %}
+</section>
+
+<form class="search-box card" method="GET" action="{{ url_for('forum') }}">
+    <input type="text" name="q" value="{{ search }}" placeholder="Ищи посты или @юзернейм">
+    {% if category_id %}
+        <input type="hidden" name="category_id" value="{{ category_id }}">
+    {% endif %}
+    <button class="btn-primary" type="submit">Поиск</button>
+</form>
+
+{% if searched_user %}
+<section class="profile-hero card">
+    <div class="profile-left">
+        <div class="avatar avatar-lg">
+            {% if searched_user.avatar %}
+                <img src="{{ url_for('static', filename='uploads/' ~ searched_user.avatar) }}" alt="avatar">
+            {% else %}
+                <span>{{ searched_user.nickname[:1] | upper }}</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="profile-right">
+        <h2>
+            {{ searched_user.nickname }}
+            {% if searched_user.role == 'admin' %}
+                <span class="verify-badge">✔</span>
+            {% endif %}
+        </h2>
+        <p class="muted">@{{ searched_user.username }}</p>
+
+        {% if searched_user.status %}
+            <div class="status-pill">{{ searched_user.status }}</div>
+        {% endif %}
+
+        <p class="profile-bio">
+            {{ searched_user.bio if searched_user.bio else "Профиль без описания." }}
+        </p>
+
+        <div class="profile-actions">
+            <a class="btn-primary" href="{{ url_for('profile', username=searched_user.username) }}">Открыть профиль</a>
+            <a class="btn-ghost" href="{{ url_for('chat_with_user', username=searched_user.username) }}">Написать</a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="stats-grid">
+    <div class="stat-card card">
+        <strong>{{ total_topics }}</strong>
+        <span>Постов</span>
+    </div>
+    <div class="stat-card card">
+        <strong>{{ total_users }}</strong>
+        <span>Пользователей</span>
+    </div>
+    <div class="stat-card card">
+        <strong>{{ total_comments }}</strong>
+        <span>Комментариев</span>
+    </div>
+</section>
+
+<section class="topics-grid">
+    {% if topics|length == 0 %}
+        <div class="empty-card card">
+            <h3>Постов пока нет</h3>
+            <p>Создай первый пост и запусти форум.</p>
+        </div>
+    {% endif %}
+
+    {% for topic in topics %}
+        <article class="topic-card card {% if topic.pinned %}pinned-card{% endif %}">
+            <div class="topic-head">
+                <a class="avatar" href="{{ url_for('profile', username=topic.author.username) }}">
+                    {% if topic.author.avatar %}
+                        <img src="{{ url_for('static', filename='uploads/' ~ topic.author.avatar) }}" alt="avatar">
+                    {% else %}
+                        <span>{{ topic.author.nickname[:1] | upper }}</span>
+                    {% endif %}
+                </a>
+
+                <div class="topic-meta">
+                    <div class="topic-author">
+                        <a href="{{ url_for('profile', username=topic.author.username) }}">
+                            {{ topic.author.nickname }}
+                        </a>
+                        {% if topic.author.role == 'admin' %}
+                            <span class="verify-badge">✔</span>
+                        {% endif %}
+                    </div>
+                    <div class="topic-submeta">
+                        @{{ topic.author.username }}
+                        {% if is_online(topic.author) %}
+                            <span class="online-dot">● Онлайн</span>
+                        {% else %}
+                            <span class="offline-dot">● Не онлайн</span>
+                        {% endif %}
+                    </div>
+                    {% if topic.author.status %}
+                        <div class="status-pill">{{ topic.author.status }}</div>
+                    {% endif %}
+                    <div class="topic-time">{{ topic.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+                </div>
+            </div>
+
+            {% if topic.pinned %}
+                <div class="pinned-label">📌 Закреплённый пост</div>
+            {% endif %}
+
+            <h2 class="topic-title">
+                <a href="{{ url_for('topic_view', topic_id=topic.id) }}">{{ topic.title }}</a>
+            </h2>
+
+            <div class="topic-meta-line">
+                <span class="category-chip">#{{ topic.category.name }}</span>
+                {% for tag in topic.tags %}
+                    <span class="tag-pill">#{{ tag.name }}</span>
+                {% endfor %}
+            </div>
+
+            <p class="topic-text">{{ topic.content_html|safe }}</p>
+
+            {% if topic.images|length > 0 %}
+                <div class="image-grid">
+                    {% for img in topic.images %}
+                        <img src="{{ url_for('static', filename='uploads/' ~ img.filename) }}" alt="post image">
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="reaction-row">
+                {% for emoji in reactions_list %}
+                    <form method="POST" action="{{ url_for('react_topic', topic_id=topic.id) }}" class="reaction-form">
+                        <input type="hidden" name="reaction" value="{{ emoji }}">
+                        <button type="submit" class="reaction-btn {% if topic.my_reaction == emoji %}active{% endif %}">
+                            {{ emoji }} <span>{{ topic.reaction_counts[emoji] }}</span>
+                        </button>
+                    </form>
+                {% endfor %}
+            </div>
+
+            <div class="post-actions">
+                <a class="small-btn" href="{{ url_for('topic_view', topic_id=topic.id) }}#comments">
+                    💬 Оставить комментарий ({{ topic.comment_count }})
+                </a>
+
+                <form method="POST" action="{{ url_for('toggle_save_topic', topic_id=topic.id) }}">
+                    <button class="small-btn" type="submit">
+                        {% if topic.is_saved %}💾 Убрать{% else %}💾 Сохранить{% endif %}
+                    </button>
+                </form>
+
+                <a class="small-btn" href="{{ url_for('report', target_type='topic', target_id=topic.id) }}">⚠ Жалоба</a>
+
+                {% if current_user.id == topic.author.id or current_user.role in ['admin', 'moderator'] %}
+                    <a class="small-btn" href="{{ url_for('edit_topic', topic_id=topic.id) }}">✏ Изменить</a>
+
+                    <form method="POST" action="{{ url_for('delete_topic', topic_id=topic.id) }}"
+                          onsubmit="return confirm('Удалить этот пост?');">
+                        <button class="small-btn danger" type="submit">🗑 Удалить</button>
+                    </form>
+                {% endif %}
+
+                {% if current_user.is_admin %}
+                    <form method="POST" action="{{ url_for('pin_topic', topic_id=topic.id) }}">
+                        <button class="small-btn" type="submit">{% if topic.pinned %}📌 Открепить{% else %}📌 Закрепить{% endif %}</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('ban_user', username=topic.author.username) }}"
+                          onsubmit="return confirm('Заблокировать пользователя?');">
+                        <button class="small-btn warning" type="submit">🔨 Бан</button>
+                    </form>
+                {% endif %}
+            </div>
+        </article>
+    {% endfor %}
+</section>
+
+{% endblock %}

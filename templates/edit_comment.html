@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Редактировать комментарий — ROZDUM{% endblock %}
+{% block content %}
+
+<section class="form-card card">
+    <div class="back-row">
+        <a class="back-btn" href="{{ url_for('topic_view', topic_id=comment.topic_id) }}#comments">← Назад</a>
+    </div>
+
+    <h1>Редактировать комментарий</h1>
+
+    <form method="POST">
+        <div class="field">
+            <label>Текст комментария</label>
+            <textarea name="content" rows="7" required>{{ comment.content }}</textarea>
+        </div>
+
+        <div class="form-actions">
+            <a class="btn-ghost" href="{{ url_for('topic_view', topic_id=comment.topic_id) }}#comments">Назад</a>
+            <button class="btn-primary" type="submit">Сохранить</button>
+        </div>
+    </form>
+</section>
+
+{% endblock %}

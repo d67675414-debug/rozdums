@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ROZDUM{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+        function toggleAdminMenu() {
+            const menu = document.getElementById("adminMenu");
+            if (menu) menu.classList.toggle("hidden");
+        }
+
+        function toggleReplies(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle("hidden");
+        }
+
+        document.addEventListener("click", function (event) {
+            const menu = document.getElementById("adminMenu");
+            const btn = document.getElementById("adminDots");
+            if (!menu || !btn) return;
+            if (!menu.contains(event.target) && !btn.contains(event.target)) {
+                menu.classList.add("hidden");
+            }
+        });
+
+        window.addEventListener("load", function () {
+            const socket = io();
+
+            socket.on("connect", () => {
+                socket.emit("join_notifications");
+                if (window.CHAT_THREAD_ID) {
+                    socket.emit("join_thread", { thread_id: window.CHAT_THREAD_ID });
+                }
+            });
+
+            socket.on("new_notification", (data) => {
+                const badge = document.getElementById("notifBadge");
+                if (!badge) return;
+                const count = data.count || 0;
+                badge.textContent = count;
+                badge.style.display = count > 0 ? "inline-flex" : "none";
+            });
+
+            socket.on("new_topic", () => {
+                if (location.pathname === "/forum") {
+                    location.reload();
+                }
+            });
+
+            socket.on("new_message", (data) => {
+                if (window.CHAT_THREAD_ID && data.thread_id === window.CHAT_THREAD_ID) {
+                    location.reload();
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="bg-glow"></div>
+
+    <header class="topbar">
+        <div class="topbar-left">
+            {% if current_user.is_authenticated %}
+                <button id="adminDots" class="dots-btn" type="button" onclick="toggleAdminMenu()">⋮</button>
+                <div id="adminMenu" class="admin-menu hidden">
+                    <form method="POST" action="{{ url_for('admin_login') }}">
+                        <input type="password" name="password" placeholder="Код доступа">
+                        <button type="submit">Активировать</button>
+                    </form>
+
+                    <a class="nav-btn tiktok-link" href="https://www.tiktok.com/@rozdumforum1488" target="_blank" rel="noopener">
+                        TikTok
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <a class="brand" href="{{ url_for('forum') }}">ROZDUM</a>
+
+        <nav class="topbar-right">
+            {% if current_user.is_authenticated %}
+                <a class="nav-btn" href="{{ url_for('chats') }}">Чаты</a>
+                <a class="nav-btn" href="{{ url_for('saved_posts') }}">Сохранённые</a>
+                <a class="nav-btn" href="{{ url_for('profile', username=current_user.username) }}">Профиль</a>
+                <a class="nav-btn" href="{{ url_for('create_topic') }}">Создать</a>
+                <a class="nav-btn" href="{{ url_for('notifications') }}">
+                    Уведомления
+                    {% if unread_notifications_count %}
+                        <span class="badge" id="notifBadge">{{ unread_notifications_count }}</span>
+                    {% else %}
+                        <span class="badge" id="notifBadge" style="display:none;">0</span>
+                    {% endif %}
+                </a>
+                {% if current_user.is_admin %}
+                    <a class="nav-btn" href="{{ url_for('admin_reports') }}">Жалобы</a>
+                {% endif %}
+                <a class="nav-btn" href="{{ url_for('logout') }}">Выход</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main class="page">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-stack">
+                    {% for message in messages %}
+                        <div class="flash">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

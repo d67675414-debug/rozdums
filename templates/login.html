@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход — ROZDUM</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="auth-body">
+    <div class="bg-glow"></div>
+
+    <main class="auth-standalone">
+        <section class="auth-standalone-hero card">
+            <div class="hero-chip">ROZDUM</div>
+            <h1>ROZDUM</h1>
+            <p>Современный форум с реакциями, профилями, комментариями, чатами и подписками.</p>
+        </section>
+
+        <section class="auth-card card">
+            <h2>Вход</h2>
+            <p class="muted">Войди в аккаунт, чтобы открыть форум.</p>
+
+            <form method="POST">
+                <div class="field">
+                    <label>Логин</label>
+                    <input type="text" name="username" placeholder="Только английские буквы" required>
+                </div>
+
+                <div class="field">
+                    <label>Пароль</label>
+                    <input type="password" name="password" placeholder="Пароль" required>
+                </div>
+
+                <button class="btn-primary" type="submit">Войти</button>
+            </form>
+
+            <a class="cta-link" href="{{ url_for('register') }}">Регистрация</a>
+        </section>
+    </main>
+</body>
+</html>

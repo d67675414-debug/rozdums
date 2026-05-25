@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Жалоба — ROZDUM{% endblock %}
+{% block content %}
+
+<div class="back-row">
+    <a class="back-btn" href="{{ target_url }}">← Назад</a>
+</div>
+
+<section class="form-card card">
+    <h1>Жалоба</h1>
+    <p class="muted">Объект: {{ target_label }}</p>
+
+    <form method="POST">
+        <div class="field">
+            <label>Категория</label>
+            <select name="reason" class="input-select" required>
+                {% for reason in reasons %}
+                    <option value="{{ reason }}">{{ reason }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Описание</label>
+            <textarea name="description" rows="6" placeholder="Коротко опиши проблему..."></textarea>
+        </div>
+
+        <div class="form-actions">
+            <a class="btn-ghost" href="{{ target_url }}">Назад</a>
+            <button class="btn-primary" type="submit">Отправить жалобу</button>
+        </div>
+    </form>
+</section>
+
+{% endblock %}

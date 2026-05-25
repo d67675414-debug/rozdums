@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Редактировать профиль — ROZDUM{% endblock %}
+{% block content %}
+
+<div class="back-row">
+    <a class="back-btn" href="{{ url_for('profile', username=current_user.username) }}">← Назад</a>
+</div>
+
+<section class="form-card card">
+    <h1>Редактировать профиль</h1>
+    <p class="muted">Можно поменять ник, описание и аватарку.</p>
+
+    <form method="POST" enctype="multipart/form-data">
+        <div class="field">
+            <label>Ник</label>
+            <input type="text" name="nickname" value="{{ current_user.nickname }}" required>
+        </div>
+
+        <div class="field">
+            <label>Описание</label>
+            <textarea name="bio" rows="6" placeholder="Расскажи о себе...">{{ current_user.bio }}</textarea>
+        </div>
+
+        <div class="field">
+            <label class="file-label">Выбери новую аватарку</label>
+            <input type="file" name="avatar" accept="image/*">
+        </div>
+
+        <div class="form-actions">
+            <a class="btn-ghost" href="{{ url_for('profile', username=current_user.username) }}">Назад</a>
+            <button class="btn-primary" type="submit">Сохранить</button>
+        </div>
+    </form>
+</section>
+
+{% endblock %}

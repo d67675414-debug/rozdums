@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Жалобы — ROZDUM{% endblock %}
+{% block content %}
+
+<div class="back-row">
+    <a class="back-btn" href="{{ url_for('forum') }}">← Назад</a>
+</div>
+
+<section class="section-title">
+    <h1>Жалобы</h1>
+</section>
+
+<section class="reports-grid">
+    {% if reports|length == 0 %}
+        <div class="empty-card card">
+            <h3>Жалоб пока нет</h3>
+        </div>
+    {% endif %}
+
+    {% for report in reports %}
+        <div class="report-card card">
+            <div class="report-top">
+                <div>
+                    <strong>{{ report.reason }}</strong>
+                    <div class="muted">{{ report.report_type }} • {{ report.status }}</div>
+                </div>
+                <div class="report-badge {% if report.status == 'resolved' %}resolved{% endif %}">
+                    {{ report.status }}
+                </div>
+            </div>
+
+            <p>{{ report.description if report.description else "Без описания" }}</p>
+
+            <div class="muted">
+                От: {{ report.reporter.nickname }} (@{{ report.reporter.username }})
+            </div>
+
+            <div class="post-actions">
+                {% if report.topic %}
+                    <a class="small-btn" href="{{ url_for('topic_view', topic_id=report.topic.id) }}">Открыть пост</a>
+                {% endif %}
+                {% if report.comment %}
+                    <a class="small-btn" href="{{ url_for('topic_view', topic_id=report.comment.topic_id) }}#comments">Открыть комментарий</a>
+                {% endif %}
+                {% if report.target_user %}
+                    <a class="small-btn" href="{{ url_for('profile', username=report.target_user.username) }}">Профиль</a>
+                {% endif %}
+
+                {% if report.status != 'resolved' %}
+                    <form method="POST" action="{{ url_for('resolve_report', report_id=report.id) }}">
+                        <button class="small-btn" type="submit">Решить</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+</section>
+
+{% endblock %}
